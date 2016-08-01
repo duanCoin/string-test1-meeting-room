@@ -77,9 +77,40 @@ function buildReceipt(promotedItems, {totalPayPrice, totalSaved}) {
     totalSaved
   }
 }
-
+// ***<没钱赚商店>收据***
+//   名称：雪碧，数量：5瓶，单价：3.00(元)，小计：12.00(元)
+//   名称：荔枝，数量：2.5斤，单价：15.00(元)，小计：37.50(元)
+//   名称：方便面，数量：3袋，单价：4.50(元)，小计：9.00(元)
+//   ----------------------
+//   总计：58.50(元)
+//   节省：7.50(元)
+//   **********************
 function buildReceiptString(receipt) {
-  // TODO
+  let lines = [];
+  lines.push('***<没钱赚商店>收据***');
+  receipt.receiptItems.map(item =>{
+    lines.push(`名称：${item.name}，数量：${item.count}${item.unit}，单价：${parseFloat(item.price).toFixed(2)}(元)，小计：${parseFloat(item.payPrice).toFixed(2)}(元)`);
+  });
+  lines.push('----------------------');
+  lines.push(`总计：${parseFloat(receipt.totalPayPrice).toFixed(2)}(元)`);
+  lines.push(`节省：${parseFloat(receipt.totalSaved).toFixed(2)}(元)`);
+  lines.push('**********************');
+
+  return lines.join('\n');
+}
+
+function printReceipt(tags) {
+  let formattedTags = formatTags(tags);
+  let countedBarcode = countBarcodes(formattedTags);
+  let buildedCartItems = buildCartItems(countedBarcode, loadAllItems());
+  let buildedPromotionos = buildPromotions(buildedCartItems, loadPromotions());
+  let calculatedTotalPrices = calculateTotalPrices(buildedPromotionos);
+  let buildedReceipt = buildReceipt(buildedPromotionos, calculatedTotalPrices);
+  let receiptString = buildReceiptString(buildedReceipt);
+  
+  require('fs').writeFileSync('1', receiptString);
+
+  console.log(receiptString);
 }
 
 module.exports = {
